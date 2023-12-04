@@ -118,18 +118,22 @@ def run(command, desc=None, errdesc=None, custom_env=None, live: bool = default_
     return (result.stdout or "")
 
 
-def is_installed(package):
+def is_installed(pkg_modulename):
+    # packages are passed here using their module names, therefore:
     try:
-        dist = importlib.metadata.distribution(package)
+        pkg_metadata = importlib.metadata.distribution(pkg_modulename);
+        # if obj is valid package is installed. Done (return obj as a proof)
     except importlib.metadata.PackageNotFoundError:
-        try:
-            spec = importlib.util.find_spec(package)
+        # If it didn't work, use the old way of checking (causing reinstalls)...
+        # Why? What's the ratio behind this? Shouldn't we just remove it?
+        try:  
+            spec = importlib.util.find_spec(pkg_modulename)
         except ModuleNotFoundError:
             return False
 
         return spec is not None
 
-    return dist is not None
+    return pkg_metadata is not None
 
 
 def repo_dir(name):
